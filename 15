@@ -1,0 +1,94 @@
+#include <iostream>
+#include <string>
+#include <vector>
+#include <unordered_map>
+
+using namespace std;
+
+class Table {
+public:
+    Table() : Table("") {
+    }
+    Table(string s) : opcode(s) {
+        um["$t0"] = "01000"; um["$t0,"] = "01000";
+        um["$t1"] = "01001"; um["$t1,"] = "01001";
+        um["$t2"] = "01010"; um["$t2,"] = "01010"; 
+        um["$t3"] = "01011"; um["$t3,"] = "01011";
+        um["$t4"] = "01100"; um["$t4,"] = "01100";
+        um["$t5"] = "01101"; um["$t5,"] = "01101";
+        um["$t6"] = "01110"; um["$t6,"] = "01110";
+        um["$t7"] = "01111"; um["$t7,"] = "01111";
+        rs = rt = rd = "";
+        imm = 0;
+    }
+    void setOpcode(string s) {
+        opcode = s;
+    }
+    void setRegister() {
+        string s;
+        if (opcode == "addi") {
+            cin >> rt >> rs >> imm;
+            //cin >> s; rt = string(s.begin(), s.begin()+3);
+            //cin >> s; rs = string(s.begin(), s.begin()+3);
+            //cin >> imm;
+        }
+        else {
+            cin >> rd >> rs >> rt;
+            //cin >> s; rd = string(s.begin(), s.begin()+3);
+            //cin >> s; rs = string(s.begin(), s.begin()+3);
+            //cin >> s; rt = string(s.begin(), s.begin()+3);
+        }
+        //cin.ignore();
+    }
+    string funct() {
+        if (opcode == "add") {
+            return "100000";
+        }
+        if (opcode == "sub") {
+            return "100010";
+        }
+        if (opcode == "or") {
+            return "100101";
+        }
+        if (opcode == "and") {
+            return "100100";
+        }
+    }
+    string immInBinary() {
+        string s(16, '0');
+        int index = 15, temp = imm;
+        while (temp) {
+            s.at(index) = (temp % 2) + '0';
+            temp /= 2;
+            index--;
+        }
+        return s;
+    }
+    void printObjectCode() {
+        if (opcode == "addi") {
+            cout << "001000" << um.at(rs) << um.at(rt) << immInBinary();
+        }
+        else {
+            cout << "000000" << um.at(rs) << um.at(rt) << um.at(rd) << "00000" << funct();
+        }
+        cout << endl;
+    }
+private:
+    string opcode;
+    string rs, rt, rd;
+    int imm;
+    unordered_map<string, string> um;
+};
+
+int main() {
+
+    Table t;
+    string opcode;
+    while (cin >> opcode) {
+        t.setOpcode(opcode);
+        t.setRegister();
+        t.printObjectCode();
+    }
+    return 0;
+}
+//000000 01000 01001 01010 00000 100000
