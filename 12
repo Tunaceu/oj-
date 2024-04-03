@@ -1,0 +1,163 @@
+#include <iostream>
+#include <string>
+#include <cstring>
+#include <vector>
+#include <unordered_map>
+
+using namespace std;
+
+class Digit { // class Digit represent a digit in base 10
+    int digit;
+public:
+    Digit() {
+        digit = 0;
+    }
+    Digit(int d) : digit(d % 10) {}
+    void setDigit(int d) { digit = d % 10; }
+    int getDigit() const {return digit;}
+};
+
+class Integer { //class Integer represent a integer
+    Digit value[1000];
+    bool sign;
+public:
+    //construct an integer in base 10 using a string.
+    //This constructor will convert the given string to integer if possible.
+    //Otherwise it will convert the digit part in prefix of the given string.
+     Integer(string n) {
+        sign = false;
+        for (int i = 0; i < 1000; i++) {
+            value[i].setDigit(0);
+        }
+        int head = 0, tail = 0;
+        bool check = true;
+        for (int i = 0; i < n.size(); i++) {
+            if (!isdigit(n.at(i)) && check) {
+                tail = i;
+                break;
+            }
+            if (i == n.size()-1 && check) {
+                tail = n.size();
+                break;
+            }
+            if (isdigit(n.at(i)) && !check) {
+                head = i;
+                check = true;
+            }
+        }
+        int j = 999;
+        if (head != 0 || tail != 0) {
+            for (int i = tail-1; i >= head; i--) {
+                value[j].setDigit(n.at(i) - '0');
+                j--;
+            }
+        }
+    }
+    //default constructor will construct an Integer object with value 0.
+    Integer() {
+        for (int i = 0; i < 1000; i++) {
+            value[i].setDigit(0);
+        }
+        sign = true;
+    }
+    //function addition will add up two integer and return a new Integer object as result.
+    int getValue(int index) const {
+        return value[index].getDigit();
+    }
+    void setValue(int index, int data) {
+        value[index].setDigit(data);
+    }
+    Integer addition(const Integer &b) const {
+        Integer temp;
+        if (this -> getSign() == true && b.getSign() == true) {
+            temp = this -> executeAdd(b);
+            temp.setSign(true);
+        }
+        if (this -> getSign() == false && b.getSign() == false) {
+            temp = this -> executeAdd(b);
+            temp.setSign(false);
+        }
+        return temp;
+    }
+    bool operator>(const Integer &b) const {
+        for (int i = 0; i < 1000; i++) {
+            if (this -> getValue(i) > b.getValue(i)) {
+                return true;
+            } 
+            if (this -> getValue(i) < b.getValue(i)) {
+                return false;
+            }
+        }
+        return false;
+    }
+    void setSign(bool b) {
+        sign = b;
+    }
+    bool getSign() const {
+        return sign;
+    }
+    Integer executeAdd(const Integer &b) const {
+        Integer temp;
+        int c = 0;
+        for (int i = 999; i >= 0; i--) {
+            int sum = this -> getValue(i) + b.getValue(i) + c;
+            temp.setValue(i, sum%10);
+            c = sum / 10;
+        }
+        return temp;
+    }
+    Integer executeSub(const Integer &b) const {
+        Integer temp;
+        if (b > *this) {
+            temp = b.subtraction(*this);
+            temp.setSign(false);
+            return temp;
+        }
+        int borrow = 0;
+        for (int i = 999; i >= 0; i--) {
+            int diff = this -> getValue(i) - b.getValue(i) - borrow;
+            if (diff < 0) {
+                diff += 10;
+                borrow = 1;
+            }
+            else {
+                borrow = 0;
+            }
+            temp.setValue(i, diff);
+        }
+        return temp;
+    }
+    //function subtraction will minus b from current object and return a new Integer object as result.
+    Integer subtraction(const Integer &b) const {
+        
+    }
+    void display() {
+        if (sign == false) {
+            cout << "-";
+        }
+        bool check = false;
+        for (int i = 0; i < 1000; i++) {
+            if (getValue(i) != 0) {
+                check = true;
+            }
+            if (check) {
+                cout << getValue(i);
+            }
+        }
+    }
+};
+
+int main()
+{
+  string a, b;
+  cin >> a >> b;
+  Integer num1(a), num2(b);
+  num1.addition(num2).display();
+  cout << endl;
+  num2.addition(num1).display();
+  cout << endl;
+  num1.subtraction(num2).display();
+  cout << endl;
+  num2.subtraction(num1).display();
+  cout << endl;
+}
